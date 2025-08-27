@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings
+# from langchain_openai import OpenAIEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_core.documents import Document
 from langchain_postgres import PGVector
 
@@ -15,7 +16,6 @@ for k in ("GOOGLE_API_KEY", "PGVECTOR_URL", "PGVECTOR_COLLECTION"):
 
 current_dir = Path(__file__).parent
 pdf_path = current_dir / "gpt5.pdf"
-C
 docs = PyPDFLoader(str(pdf_path)).load()
 
 splits = RecursiveCharacterTextSplitter(
@@ -67,12 +67,17 @@ ids = [f"doc-{i}" for i in range(len(enriched))]
 #     id_value = f"doc-{i}"
 #     ids.append(id_value)
 
-embeddings = OpenAIEmbeddings(model = os.getenv("OPENAI_MODEL", "text-embedding-3-small"))
+# embeddings = OpenAIEmbeddings(model = os.getenv("OPENAI_MODEL", "text-embedding-3-small"))
+gemini_model = os.getenv("GOOGLE_MODEL", "models/embedding-001")
+embeddings = GoogleGenerativeAIEmbeddings(
+    model=gemini_model,
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
 
-store = PGVector.from_documents(
-    embeddings = embeddings,
+store = PGVector(
+    embeddings=embeddings,
     collection_name=os.getenv("PGVECTOR_COLLECTION"),
-    connection_string=os.getenv("PGVECTOR_URL"),
+    connection=os.getenv("PGVECTOR_URL"),
     use_jsonb=True,
 )
-store.add_documents(enriched, ids)
+store.add_documents(documents=enriched, ids=ids)
