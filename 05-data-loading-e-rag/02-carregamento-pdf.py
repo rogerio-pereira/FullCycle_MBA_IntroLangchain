@@ -9,3 +9,7 @@ splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
 chunks = splitter.split_documents(docs)
 
 print(len(chunks))
+
+# Make sure to run 
+#   cd 05-data-loading-e-rag
+# before running this file
