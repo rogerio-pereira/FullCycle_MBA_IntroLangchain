@@ -40,6 +40,7 @@ enriched = [
 
     for d in splits
 ]
+
 # readable form
 #
 # enriched = []
@@ -57,3 +58,21 @@ enriched = [
 #     )
 #
 #     enriched.append(doc)
+
+ids = [f"doc-{i}" for i in range(len(enriched))]
+# Readable form
+# ids = []
+
+# for i in range(len(enriched)):
+#     id_value = f"doc-{i}"
+#     ids.append(id_value)
+
+embeddings = OpenAIEmbeddings(model = os.getenv("OPENAI_MODEL", "text-embedding-3-small"))
+
+store = PGVector.from_documents(
+    embeddings = embeddings,
+    collection_name=os.getenv("PGVECTOR_COLLECTION"),
+    connection_string=os.getenv("PGVECTOR_URL"),
+    use_jsonb=True,
+)
+store.add_documents(enriched, ids)
